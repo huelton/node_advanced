@@ -1,0 +1,7 @@
+node_modules
+.vscode
+.env
+.nyc*
+isolate-0x*
+variaveis.ini
+coverage
