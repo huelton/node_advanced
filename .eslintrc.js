@@ -21,4 +21,9 @@ module.exports = {
     "no-unused-vars": ["error", { argsIgnorePattern: "next" }],
     "no-console": ["error", { allow: ["warn", "error", "log"] }],
   },
+  settings: {
+    "import/resolver": {
+      typescript: {}, // this loads <rootdir>/tsconfig.json to eslint
+    },
+  },
 };

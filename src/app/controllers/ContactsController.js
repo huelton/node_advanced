@@ -1,4 +1,4 @@
-import Customer from "../models/Customer";
+import Contact from "../models/Contact";
 
 const customers = [
   { id: 1, nome: "Dev Samurai", site: "http://devsamurai.com.br" },
@@ -6,31 +6,25 @@ const customers = [
   { id: 3, nome: "UOL", site: "http://uol.com.br" },
 ];
 
-class CustomersController {
+class ContactsController {
   async index(req, res) {
     try {
-      const data = await Customer.findAll({
+      const data = await Contact.findAll({
         limit: 1000,
       });
       res.json(data);
     } catch (error) {
-      console.error("Error fetching customers:", error);
+      console.error("Error fetching contacts:", error);
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
 
-  async show(req, res) {
+  show(req, res) {
     const id = parseInt(req.params.id, 10);
-    try {
-      const data = Customer.findByPk(id);
-      // const status = data.status ? 200 : 404;
-      console.log("GET :: /customers/:id", data);
-      res.json(data);
-      // res.status(status).json(data.status);
-    } catch (error) {
-      console.error("Error fetching customers:", error);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    const customer = customers.find(item => item.id === id);
+    const status = customer ? 200 : 404;
+    console.log("GET :: /customers/:id", customer);
+    return res.status(status).json(customer);
   }
 
   create(req, res) {
@@ -64,4 +58,4 @@ class CustomersController {
   }
 }
 
-export default new CustomersController();
+export default new ContactsController();

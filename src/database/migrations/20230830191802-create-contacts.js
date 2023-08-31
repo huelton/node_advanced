@@ -1,6 +1,6 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable("customers", {
+    return queryInterface.createTable("contacts", {
       id: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -24,10 +24,17 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false,
       },
+      customer_id: {
+        type: Sequelize.INTEGER,
+        references: { model: "customers", key: "id" },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+        allowNull: false,
+      },
     });
   },
 
   down: queryInterface => {
-    return queryInterface.dropTable("customers");
+    return queryInterface.dropTable("contacts");
   },
 };

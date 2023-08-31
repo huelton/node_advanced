@@ -43,7 +43,6 @@ Site do Node.js: https://nodejs.org/
 
 ```
 
-
 #### INSTALAÇÃO DE OUTRAS LIBS NODE JS
 
 ```
@@ -54,9 +53,63 @@ Site do Node.js: https://nodejs.org/
 
 ```
 
+ ##### Configuração Sequelize
+ ###### Arquivo na raiz: .sequelizerc
+
+```
+const { resolve } = require("path");
+
+module.exports = {
+  "config": resolve(__dirname, "src", "config", "database.js"),
+  "models-path": resolve(__dirname, "src", "app", "models"),
+  "migrations-path": resolve(__dirname, "src", "database", "migrations"),
+  "seeders-path": resolve(__dirname, "src", "database", "seeds"),
+}
+
+```
+
+ ##### Configuração banco de dados mysql
+ ###### Arquivo: config/database.js
+
+```
+
+module.exports = {
+  dialect: "mysql",
+  host: "localhost", # endereco servidor
+  username: "root", # usuario fake
+  password: "root", # senha fake
+  database: "teste_node", # banco fake
+  define: {
+    timestamp: true, // cria duas colunas: createdAt e updatedAt
+    underscored: true,
+    underscoredAll: true,
+  },
+};
+
+```
+
 #### EXECUTAR APLICAÇÃO
 
 ```
 	npm run dev
 
 ```
+
+
+#### SEQUELIZE MIGRATE
+
+ ###### Comando para criar o arquivo de migração pelo sequelize
+```
+	yarn sequelize migration: create --name=create-customers
+
+```
+
+ ###### Comando para executar o arquivo de migração do sequelize
+```
+	yarn sequelize db:migrate
+
+```
+
+ ###### Comando para desfazer todas as migrações do sequelize
+```
+	yarn sequelize db:migrate:undo:all
