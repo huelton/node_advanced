@@ -12,10 +12,10 @@ routes.put("/customers/:id", customers.update);
 routes.delete("/customers/:id", customers.destroy);
 
 // CONTACT
-routes.get("/contacts", contacts.index);
-routes.get("/contacts/:id", contacts.show);
-routes.post("/contacts", contacts.create);
-routes.put("/contacts/:id", contacts.update);
-routes.delete("/contacts/:id", contacts.destroy);
+routes.get("/customers/:customerId/contacts", contacts.index);
+routes.get("/customers/:customerId/contacts/:id", contacts.show);
+routes.post("/customers/:customerId/contacts", contacts.create);
+routes.put("/customers/:customerId/contacts/:id", contacts.update);
+routes.delete("/customers/:customerId/contacts/:id", contacts.destroy);
 
 export default routes;

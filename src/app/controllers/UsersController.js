@@ -1,10 +1,11 @@
 import * as Yup from "yup";
 import { Op } from "sequelize";
 import { parseISO } from "date-fns";
-import Customer from "../models/Customer";
 import Contact from "../models/Contact";
+import Customer from "../models/Customer";
+import User from "../models/User";
 
-class CustomersController {
+class UsersController {
   async index(req, res) {
     const {
       nome,
@@ -20,7 +21,7 @@ class CustomersController {
     const page = req.query.page || 1;
     const limit = req.query.limit || 25;
 
-    let where = {};
+    let where = { customer_id: req.params.customerId };
     let order = [];
 
     if (nome) {
@@ -91,14 +92,7 @@ class CustomersController {
     }
 
     try {
-      const data = await Customer.findAll({
-        include: [
-          {
-            model: Contact,
-            attributes: ["id", "status"],
-            required: true, // obrigar o campo existir.
-          },
-        ],
+      const data = await User.findAll({
         where,
         order,
         limit,
@@ -113,13 +107,15 @@ class CustomersController {
 
   async show(req, res) {
     try {
-      const customer = await Customer.findByPk(req.params.id);
-      if (!customer) {
-        res.status(404).json({ error: "Customer Not Found" });
-      } else {
-        console.log("GET :: /customers/:id", customer);
-        res.json(customer);
-      }
+      const data = await Contact.findOne({
+        where: {
+          customer_id: req.params.customerId,
+          id: req.params.id,
+        },
+        // include: [Customer], usado caso queira mostrar os dados de Customer
+        attributes: { exclude: ["customer_id", "customerId"] },
+      });
+      res.json(data);
     } catch (error) {
       console.error("Error fetching customers:", error);
       res.status(500).json({ error: "Internal Server Error" });
@@ -139,8 +135,14 @@ class CustomersController {
       return res.status(400).json({ error: "Error on validate schema" });
     }
 
-    const newCustomer = await Customer.create(req.body);
-    return res.status(201).json(newCustomer);
+    const newContact = await Contact.create({
+      customer_id: req.params.customerId,
+      ...req.body,
+      attributes: { exclude: ["customer_id", "customerId"] },
+    });
+    return res.status(201).json({
+      newContact,
+    });
   }
 
   async update(req, res) {
@@ -154,24 +156,36 @@ class CustomersController {
       return res.status(400).json({ error: "Error on validate schema" });
     }
 
-    const customer = await Customer.findByPk(req.params.id);
-    if (!customer) {
-      res.status(404).json({ error: "Customer Not Found" });
+    const data = await Contact.findOne({
+      where: {
+        customer_id: req.params.customerId,
+        id: req.params.id,
+      },
+      // include: [Customer], usado caso queira mostrar os dados de Customer
+      attributes: { exclude: ["customer_id", "customerId"] },
+    });
+    if (!data) {
+      res.status(404).json({ error: "Contact Not Found" });
     }
 
-    await customer.update(req.body);
+    await data.update(req.body);
 
-    return res.json(customer);
+    return res.json(data);
   }
 
   async destroy(req, res) {
-    const customer = await Customer.findByPk(req.params.id);
-    if (!customer) {
-      res.status(404).json({ error: "Customer Not Found" });
+    const data = await Contact.findOne({
+      where: {
+        customer_id: req.params.customerId,
+        id: req.params.id,
+      },
+    });
+    if (!data) {
+      res.status(404).json({ error: "Contact Not Found" });
     }
-    await customer.destroy();
+    await data.destroy();
     return res.status(204).json();
   }
 }
 
-export default new CustomersController();
+export default new ContactsController();
