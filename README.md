@@ -88,14 +88,6 @@ module.exports = {
 
 ```
 
-#### EXECUTAR APLICAÇÃO
-
-```
-	npm run dev
-
-```
-
-
 #### SEQUELIZE MIGRATE
 
  ###### Comando para criar o arquivo de migração pelo sequelize
@@ -113,3 +105,25 @@ module.exports = {
  ###### Comando para desfazer todas as migrações do sequelize
 ```
 	yarn sequelize db:migrate:undo:all
+
+```
+
+ ###### Lib para datas
+```
+	yarn add data-fns@2.8.1
+
+```
+
+ ###### lib validaçao de schema para request Body
+```
+	yarn add yup
+
+```
+
+
+#### EXECUTAR APLICAÇÃO
+
+```
+	npm run dev
+
+```
