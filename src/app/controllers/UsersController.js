@@ -2,7 +2,6 @@ import * as Yup from "yup";
 import { Op } from "sequelize";
 import { parseISO } from "date-fns";
 import Contact from "../models/Contact";
-import Customer from "../models/Customer";
 import User from "../models/User";
 
 class UsersController {
@@ -188,4 +187,4 @@ class UsersController {
   }
 }
 
-export default new ContactsController();
+export default new UsersController();

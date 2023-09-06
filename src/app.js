@@ -1,5 +1,7 @@
 import express from "express";
-import routes from "./routes";
+import userRouter from "./routes/UserRouter";
+import customerRouter from "./routes/CustomerRouter";
+import contactRouter from "./routes/ContactRouter";
 
 import "./database";
 
@@ -15,7 +17,9 @@ class App {
   }
 
   routes() {
-    this.server.use(routes);
+    this.server.use(userRouter);
+    this.server.use(customerRouter);
+    this.server.use(contactRouter);
   }
 }
 
