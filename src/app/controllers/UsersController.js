@@ -9,7 +9,6 @@ class UsersController {
     const {
       nome,
       email,
-      status,
       createdBefore,
       createdAfter,
       updatedBefore,
@@ -20,7 +19,7 @@ class UsersController {
     const page = req.query.page || 1;
     const limit = req.query.limit || 25;
 
-    let where = { customer_id: req.params.customerId };
+    let where = {};
     let order = [];
 
     if (nome) {
@@ -37,15 +36,6 @@ class UsersController {
         ...where,
         email: {
           [Op.like]: email,
-        },
-      };
-    }
-
-    if (status) {
-      where = {
-        ...where,
-        status: {
-          [Op.in]: status.split(",").map(item => item.toUpperCase()),
         },
       };
     }
@@ -92,6 +82,7 @@ class UsersController {
 
     try {
       const data = await User.findAll({
+        attributes: { exclude: ["password", "password_hash"] },
         where,
         order,
         limit,
@@ -99,24 +90,20 @@ class UsersController {
       });
       res.json(data);
     } catch (error) {
-      console.error("Error fetching customers:", error);
+      console.error("Error fetching users:", error);
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
 
   async show(req, res) {
     try {
-      const data = await Contact.findOne({
-        where: {
-          customer_id: req.params.customerId,
-          id: req.params.id,
-        },
-        // include: [Customer], usado caso queira mostrar os dados de Customer
-        attributes: { exclude: ["customer_id", "customerId"] },
-      });
+      const data = await User.findByPk(req.params.id);
+      if (!data) {
+        res.status(404).json();
+      }
       res.json(data);
     } catch (error) {
-      console.error("Error fetching customers:", error);
+      console.error("Error fetching users:", error);
       res.status(500).json({ error: "Internal Server Error" });
     }
   }
@@ -127,60 +114,64 @@ class UsersController {
       email: Yup.string()
         .email()
         .required(),
-      status: Yup.string().uppercase(),
+      password: Yup.string()
+        .min(8)
+        .required(),
+      passwordConfirmation: Yup.string().when("password", (password, field) =>
+        password ? field.required().oneOf([Yup.ref("password")]) : field
+      ),
     });
 
     if (!(await schema.isValid(req.body))) {
       return res.status(400).json({ error: "Error on validate schema" });
     }
 
-    const newContact = await Contact.create({
-      customer_id: req.params.customerId,
-      ...req.body,
-      attributes: { exclude: ["customer_id", "customerId"] },
-    });
-    return res.status(201).json({
-      newContact,
-    });
+    const { id, nome, email, createdAt, updatedAt } = await User.create(
+      req.body
+    );
+    return res.status(201).json({ id, nome, email, createdAt, updatedAt });
   }
 
   async update(req, res) {
     const schema = Yup.object().shape({
       nome: Yup.string(),
       email: Yup.string().email(),
-      status: Yup.string().uppercase(),
+      oldPassword: Yup.string().min(8),
+      password: Yup.string()
+        .min(8)
+        .when("oldPassword", (oldPassword, field) =>
+          oldPassword ? field.required() : field
+        ),
+      passwordConfirmation: Yup.string().when("password", (password, field) =>
+        password ? field.required().oneOf([Yup.ref("password")]) : field
+      ),
     });
 
     if (!(await schema.isValid(req.body))) {
       return res.status(400).json({ error: "Error on validate schema" });
     }
 
-    const data = await Contact.findOne({
-      where: {
-        customer_id: req.params.customerId,
-        id: req.params.id,
-      },
-      // include: [Customer], usado caso queira mostrar os dados de Customer
-      attributes: { exclude: ["customer_id", "customerId"] },
-    });
+    const data = await User.findByPk(req.params.id);
     if (!data) {
-      res.status(404).json({ error: "Contact Not Found" });
+      res.status(404).json({ error: "User Not Found" });
     }
 
-    await data.update(req.body);
+    const { oldPassword } = req.body;
+    if (oldPassword && !(await data.checkPassword(oldPassword))) {
+      res.status(401).json({ error: "User Password not Match" });
+    }
 
-    return res.json(data);
+    const { id, nome, email, createdAt, updatedAt } = await data.update(
+      req.body
+    );
+
+    return res.status(201).json({ id, nome, email, createdAt, updatedAt });
   }
 
   async destroy(req, res) {
-    const data = await Contact.findOne({
-      where: {
-        customer_id: req.params.customerId,
-        id: req.params.id,
-      },
-    });
+    const data = await User.findByPk(req.params.id);
     if (!data) {
-      res.status(404).json({ error: "Contact Not Found" });
+      res.status(404).json({ error: "User Not Found" });
     }
     await data.destroy();
     return res.status(204).json();
